@@ -1,10 +1,11 @@
 package main
 
 import (
-	"chat/config"
 	"embed"
 	"log"
 
+	"github.com/bruxaodev/overlay-for-chat/config"
+	hook "github.com/robotn/gohook"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
@@ -18,6 +19,7 @@ var assets embed.FS
 var frameless = false
 var configPath = "config.json"
 var conf *config.Config
+var Visible = true
 
 // main function serves as the application's entry point. It initializes the application, creates a window,
 // and starts a goroutine that emits a time-based event every second. It subsequently runs the application and
@@ -27,7 +29,6 @@ func main() {
 	if _err != nil {
 		log.Fatal(_err)
 	}
-
 	// Create a new Wails application by providing the necessary options.
 	// Variables 'Name' and 'Description' are for application metadata.
 	// 'Assets' configures the asset server with the 'FS' variable pointing to the frontend files.
@@ -49,7 +50,7 @@ func main() {
 	// 'Mac' options tailor the window when running on macOS.
 	// 'BackgroundColour' is the background colour of the window.
 	// 'URL' is the URL that will be loaded into the webview.
-	app.NewWebviewWindowWithOptions(application.WebviewWindowOptions{
+	overlay := app.NewWebviewWindowWithOptions(application.WebviewWindowOptions{
 		Title: "Chat",
 		Mac: application.MacWindow{
 			InvisibleTitleBarHeight: 50,
@@ -65,37 +66,43 @@ func main() {
 		URL:            conf.Link,
 		X:              conf.X,
 		Y:              conf.Y,
-		KeyBindings: map[string]func(window *application.WebviewWindow){
-			"CmdOrCtrl+Shift+X": func(window *application.WebviewWindow) {
-				window.SetFrameless(!frameless)
-				frameless = !frameless
-				x, y := window.Position()
-				w, h := window.Size()
-				config.SaveConfig(configPath, &config.Config{
-					Frameless: frameless,
-					X:         x,
-					Y:         y,
-					Width:     w,
-					Height:    h,
-					Link:      conf.Link,
-				})
-			},
-		},
 	})
 
-	// Create a goroutine that emits an event containing the current time every second.
-	// The frontend can listen to this event and update the UI accordingly.
-	// go func() {
-	// 	for {
-	// 		// now := time.Now().Format(time.RFC1123)
-	// 		// app.Events.Emit(&application.WailsEvent{
-	// 		// 	Name: "time",
-	// 		// 	Data: now,
-	// 		// })
-	// 		time.Sleep(time.Second)
+	go func() {
+		for {
+			hook.Register(hook.KeyDown, conf.ShowHideWindowKey, func(e hook.Event) {
+				Visible = !Visible
+				if Visible {
+					overlay.Show()
+				} else {
+					overlay.Hide()
+				}
+			})
+			hook.Register(hook.KeyDown, conf.HideBarAndSaveKey, func(e hook.Event) {
+				overlay.Show()
+				frameless = !frameless
+				overlay.SetFrameless(!frameless)
+				x, y := overlay.Position()
+				w, h := overlay.Size()
+				config.SaveConfig(configPath, &config.Config{
+					Frameless:         frameless,
+					X:                 x,
+					Y:                 y,
+					Width:             w,
+					Height:            h,
+					Link:              conf.Link,
+					HideBarAndSaveKey: conf.HideBarAndSaveKey,
+					ShowHideWindowKey: conf.ShowHideWindowKey,
+				})
+			})
 
-	// 	}
-	// }()
+			s := hook.Start()
+			<-hook.Process(s)
+
+			// Sleep for 20 milliseconds before checking the event again.
+			// time.Sleep(20 * time.Millisecond)
+		}
+	}()
 
 	// Run the application. This blocks until the application has been exited.
 	err := app.Run()

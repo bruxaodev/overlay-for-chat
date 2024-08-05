@@ -7,12 +7,14 @@ import (
 )
 
 type Config struct {
-	Frameless bool   `json:"frameless"`
-	X         int    `json:"x"`
-	Y         int    `json:"y"`
-	Width     int    `json:"width"`
-	Height    int    `json:"height"`
-	Link      string `json:"link"`
+	Frameless         bool     `json:"frameless"`
+	X                 int      `json:"x"`
+	Y                 int      `json:"y"`
+	Width             int      `json:"width"`
+	Height            int      `json:"height"`
+	Link              string   `json:"link"`
+	HideBarAndSaveKey []string `json:"hidebar_save_key"`
+	ShowHideWindowKey []string `json:"show_hide_key"`
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -20,12 +22,14 @@ func LoadConfig(path string) (*Config, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			conf := &Config{
-				Frameless: false,
-				X:         0,
-				Y:         0,
-				Width:     350,
-				Height:    800,
-				Link:      "https://google.com",
+				Frameless:         false,
+				X:                 0,
+				Y:                 0,
+				Width:             350,
+				Height:            800,
+				Link:              "https://github.com/bruxaodev/overlay-for-chat/blob/main/README.md",
+				HideBarAndSaveKey: []string{"ctrl", "shift", "x"},
+				ShowHideWindowKey: []string{"ctrl", "shift", "z"},
 			}
 			SaveConfig(path, conf)
 			return conf, nil

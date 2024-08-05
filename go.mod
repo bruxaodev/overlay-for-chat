@@ -1,10 +1,13 @@
-module chat
+module github.com/bruxaodev/overlay-for-chat
 
 go 1.22.4
 
 toolchain go1.22.5
 
-require github.com/wailsapp/wails/v3 v3.0.0-alpha.6
+require (
+	github.com/robotn/gohook v0.41.0
+	github.com/wailsapp/wails/v3 v3.0.0-alpha.6
+)
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
@@ -37,6 +40,7 @@ require (
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
+	github.com/vcaesar/keycode v0.10.1 // indirect
 	github.com/wailsapp/go-webview2 v1.0.11 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
