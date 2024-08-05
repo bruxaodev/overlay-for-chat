@@ -1,0 +1,15 @@
+{
+	"fixed": {
+		"file_version": "0.1.0"
+	},
+	"info": {
+		"0000": {
+			"ProductVersion": "0.1.0",
+			"CompanyName": "Bruxaodev",
+			"FileDescription": "Overlay",
+			"LegalCopyright": "© now, Bruxaodev",
+			"ProductName": "Overlay",
+			"Comments": "A simple overlay"
+		}
+	}
+}
