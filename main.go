@@ -56,7 +56,7 @@ func main() {
 		URL:               conf.Link,
 		X:                 conf.X,
 		Y:                 conf.Y,
-		IgnoreMouseEvents: false,
+		IgnoreMouseEvents: conf.Frameless,
 	})
 
 	go func() {
