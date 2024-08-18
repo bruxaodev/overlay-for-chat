@@ -20,20 +20,15 @@ var frameless = false
 var configPath = "config.json"
 var conf *config.Config
 var Visible = true
+var Enable = true
 
-// main function serves as the application's entry point. It initializes the application, creates a window,
-// and starts a goroutine that emits a time-based event every second. It subsequently runs the application and
-// logs any error that might occur.
 func main() {
 	conf, _err := config.LoadConfig(configPath)
 	if _err != nil {
 		log.Fatal(_err)
 	}
-	// Create a new Wails application by providing the necessary options.
-	// Variables 'Name' and 'Description' are for application metadata.
-	// 'Assets' configures the asset server with the 'FS' variable pointing to the frontend files.
-	// 'Bind' is a list of Go struct instances. The frontend has access to the methods of these instances.
-	// 'Mac' options tailor the application when running an macOS.
+	frameless = conf.Frameless
+
 	app := application.New(application.Options{
 		Name:        "Chat",
 		Description: "chat",
@@ -45,11 +40,6 @@ func main() {
 		},
 	})
 
-	// Create a new window with the necessary options.
-	// 'Title' is the title of the window.
-	// 'Mac' options tailor the window when running on macOS.
-	// 'BackgroundColour' is the background colour of the window.
-	// 'URL' is the URL that will be loaded into the webview.
 	overlay := app.NewWebviewWindowWithOptions(application.WebviewWindowOptions{
 		Title: "Chat",
 		Mac: application.MacWindow{
@@ -57,15 +47,16 @@ func main() {
 			Backdrop:                application.MacBackdropTranslucent,
 			TitleBar:                application.MacTitleBarHiddenInset,
 		},
-		BackgroundType: application.BackgroundTypeTransparent,
-		Width:          conf.Width,
-		Height:         conf.Height,
-		AlwaysOnTop:    true,
-		Frameless:      conf.Frameless,
-		DisableResize:  false,
-		URL:            conf.Link,
-		X:              conf.X,
-		Y:              conf.Y,
+		BackgroundType:    application.BackgroundTypeTransparent,
+		AlwaysOnTop:       true,
+		DisableResize:     false,
+		Width:             conf.Width,
+		Height:            conf.Height,
+		Frameless:         conf.Frameless,
+		URL:               conf.Link,
+		X:                 conf.X,
+		Y:                 conf.Y,
+		IgnoreMouseEvents: false,
 	})
 
 	go func() {
@@ -81,7 +72,8 @@ func main() {
 			hook.Register(hook.KeyDown, conf.HideBarAndSaveKey, func(e hook.Event) {
 				overlay.Show()
 				frameless = !frameless
-				overlay.SetFrameless(!frameless)
+				overlay.SetFrameless(frameless)
+				overlay.SetIgnoreMouseEvents(frameless)
 				x, y := overlay.Position()
 				w, h := overlay.Size()
 				config.SaveConfig(configPath, &config.Config{
@@ -99,8 +91,6 @@ func main() {
 			s := hook.Start()
 			<-hook.Process(s)
 
-			// Sleep for 20 milliseconds before checking the event again.
-			// time.Sleep(20 * time.Millisecond)
 		}
 	}()
 
